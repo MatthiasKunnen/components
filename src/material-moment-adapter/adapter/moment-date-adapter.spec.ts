@@ -491,10 +491,25 @@ describe('MomentDateAdapter with MAT_MOMENT_DATE_ADAPTER_OPTIONS override', () =
         .toEqual(moment([2017,  FEB,  1]).format('l'));
     });
 
+
+    it('should detect valid strings according to multiple formats', () => {
+      expect(adapter.parse('1/2/2017', ['D-M-YYYY', 'D/M/YYYY'])!.format('l'))
+        .toEqual(moment([2017,  FEB,  1]).format('l'));
+      expect(adapter.parse('February 1, 2017', ['MMM D, YYYY', 'MMMM D, YYYY'])!.format('l'))
+        .toEqual(moment([2017,  FEB,  1]).format('l'));
+    });
+
     it('should detect invalid strings according to given format', () => {
       expect(adapter.parse('2017-01-01', 'MM/DD/YYYY')!.isValid()).toEqual(false);
       expect(adapter.parse('1/2/2017', 'MM/DD/YYYY')!.isValid()).toEqual(false);
       expect(adapter.parse('Jan 5, 2017', 'MMMM D, YYYY')!.isValid()).toEqual(false);
+    });
+
+    it('should detect invalid strings according to multiple formats', () => {
+      expect(adapter.parse('2017-01-01', ['YYYY/MM/DD', 'MM/DD/YYYY'])!.isValid()).toEqual(false);
+      expect(adapter.parse('1/2/2017', ['M/Y', 'MM/DD/YYYY'])!.isValid()).toEqual(false);
+      expect(adapter.parse('Jan 5, 2017', ['D MMM, YYYY', 'MMMM D, YYYY'])!.isValid())
+        .toEqual(false);
     });
 
   });
