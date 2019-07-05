@@ -320,8 +320,23 @@ export class MatDatepickerInput<D> implements ControlValueAccessor, OnDestroy, V
   }
 
   _onInput(value: string) {
-    let date = this._dateAdapter.parse(value, this._dateFormats.parse.dateInput);
-    this._lastValueValid = !date || this._dateAdapter.isValid(date);
+    let inputFormats = this._dateFormats.parse.dateInput;
+
+    if (!Array.isArray(inputFormats)) {
+        inputFormats = [inputFormats];
+    }
+
+    let date;
+
+    for (const format of inputFormats) {
+      date = this._dateAdapter.parse(value, format);
+      this._lastValueValid = !date || this._dateAdapter.isValid(date);
+
+      if (this._lastValueValid) {
+          break;
+      }
+    }
+
     date = this._getValidDateOrNull(date);
 
     if (!this._dateAdapter.sameDate(date, this._value)) {

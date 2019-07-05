@@ -12,9 +12,15 @@ import {
 import {Component, FactoryProvider, Type, ValueProvider, ViewChild} from '@angular/core';
 import {ComponentFixture, fakeAsync, flush, inject, TestBed, tick} from '@angular/core/testing';
 import {FormControl, FormsModule, NgModel, ReactiveFormsModule} from '@angular/forms';
-import {MAT_DATE_LOCALE, MatNativeDateModule, NativeDateModule} from '@angular/material/core';
+import {
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+  NativeDateModule,
+} from '@angular/material/core';
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {DEC, JAN, JUL, JUN, SEP} from '@angular/material/testing';
+import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {By} from '@angular/platform-browser';
 import {BrowserDynamicTestingModule} from '@angular/platform-browser-dynamic/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -876,6 +882,7 @@ describe('MatDatepicker', () => {
 
         expect(testComponent.datepickerToggle.disabled).toBe(true);
       });
+
     });
 
     describe('datepicker with mat-datepicker-toggle', () => {
@@ -1526,6 +1533,123 @@ describe('MatDatepicker', () => {
         const overlay = document.querySelector('.cdk-global-overlay-wrapper')!;
 
         expect(overlay.getAttribute('dir')).toBe('rtl');
+      });
+
+    });
+
+  });
+
+  describe('with MatMomentDateModule', () => {
+
+    describe('standard picker', () => {
+      let fixture: ComponentFixture<StandardDatepicker>;
+      let testComponent: StandardDatepicker;
+
+      beforeEach(fakeAsync(() => {
+        fixture = createComponent(StandardDatepicker, [MatMomentDateModule], [
+          {
+            provide: MAT_DATE_FORMATS,
+            useValue: {
+              parse: {
+                dateInput: 'M/D/YYYY',
+              },
+            },
+          },
+        ]);
+        fixture.detectChanges();
+
+        testComponent = fixture.componentInstance;
+      }));
+
+      afterEach(fakeAsync(() => {
+        testComponent.datepicker.close();
+        fixture.detectChanges();
+        flush();
+      }));
+
+      it('should parse a manually entered valid date with a single format', () => {
+        const selected = new Date(2017, JAN, 1);
+        const inputElement = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+        inputElement.value = '1/1/2017';
+        fixture.detectChanges();
+        dispatchFakeEvent(inputElement, 'input');
+        fixture.detectChanges();
+
+        expect(testComponent.datepickerInput.value).toEqual(selected);
+      });
+
+      it('should parse a manually entered valid date with multiple formats', () => {
+        TestBed.resetTestingModule();
+        fixture = createComponent(
+          DatepickerWithFormControl,
+          [MatMomentDateModule],
+          [
+            {
+              provide: MAT_DATE_FORMATS,
+              useValue: {
+                parse: {
+                  dateInput: ['M/D/YYYY', 'MMMM D, YYYY'],
+                },
+              },
+            },
+          ],
+        );
+        fixture.detectChanges();
+
+        const tests = [
+          {date: new Date(2017, JAN, 1), string: 'January 1, 2017'},
+          {date: new Date(2017, JAN, 2), string: '1/1/2017'},
+        ];
+
+        for (const test of tests) {
+          const selected = test.date
+          const inputElement = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+          inputElement.value = test.string;
+          fixture.detectChanges();
+          dispatchFakeEvent(inputElement, 'input');
+          fixture.detectChanges();
+
+          expect(testComponent.datepickerInput.value).toEqual(selected);
+        }
+      });
+
+      it('should not parse a manually entered invalid date with a single format', () => {
+        const selected = new Date(2017, JAN, 1);
+        const inputElement = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+        inputElement.value = 'Jan 1, 2017';
+        fixture.detectChanges();
+        dispatchFakeEvent(inputElement, 'input');
+        fixture.detectChanges();
+
+        expect(testComponent.datepickerInput.value).not.toEqual(selected);
+      });
+
+      it('should not parse a manually entered invalid date with multiple formats', () => {
+        TestBed.resetTestingModule();
+        fixture = createComponent(
+          DatepickerWithFormControl,
+          [MatMomentDateModule],
+          [
+            {
+              provide: MAT_DATE_FORMATS,
+              useValue: {
+                parse: {
+                  dateInput: ['M/D/YYYY', 'MMMM D, YYYY'],
+                },
+              },
+            },
+          ],
+        );
+        fixture.detectChanges();
+
+        const selected = new Date(2017, JAN, 1);
+        const inputElement = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+        inputElement.value = 'Jan 1, 2017';
+        fixture.detectChanges();
+        dispatchFakeEvent(inputElement, 'input');
+        fixture.detectChanges();
+
+        expect(testComponent.datepickerInput.value).not.toEqual(selected);
       });
 
     });
