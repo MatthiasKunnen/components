@@ -4,6 +4,7 @@
 {
   "extends": "./tsconfig-build",
   "compilerOptions": {
+    "noUnusedLocals": false,
     "importHelpers": false,
     "module": "commonjs",
     "target": "es5",

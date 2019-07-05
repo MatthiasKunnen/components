@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitAny": true,

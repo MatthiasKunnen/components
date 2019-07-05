@@ -104,6 +104,7 @@ module.exports = config => {
     browserConsoleLogOptions: {terminal: true, level: 'log'},
 
     client: {
+      captureConsole: true,
       jasmine: {
         // TODO(jelbourn): re-enable random test order once we can de-flake existing issues.
         random: false
